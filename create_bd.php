@@ -92,7 +92,7 @@ function getParamsIndicators(){
  * @return void
  */
 function createTable(){
-    
+       
     $arProperty = getParamsIndicators();
     //создание HL-блока 
     $result = HL\HighloadBlockTable::add($arProperty["Name"]);      
@@ -120,5 +120,45 @@ function createTable(){
     }
 
 }
+
+
+/**
+ * checkTable  -  проверяем наличие таблицы
+ *
+ * @param  mixed $NameTable
+ * @return void
+ */
+function checkTable($NameTable){
+    $rsData = HL\HighloadBlockTable::getList(array('filter'=>array('TABLE_NAME'=>$NameTable)));
+    if ( !($hldata = $rsData->fetch()) ){
+        echo "Инфоблок не создан";
+    }else {
+        echo "Инфоблок создан";
+    }
+
+}
+
+/**
+ * addData - добавление записей в таблицу
+ *
+ * @return void
+ */
+function addData($arParams){
+    
+}
+
+/**
+ * getItem - Получаем записи HL блока 
+ *
+ * @return void
+ */
+function getItem(){
+    
+}
+
+// $CreateTable = createTable();
+// print_r($CreateTable);
+
+checkTable('Ratingsity');
 
 ?>
