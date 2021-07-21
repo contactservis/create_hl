@@ -132,8 +132,10 @@ function checkTable($NameTable){
     $rsData = HL\HighloadBlockTable::getList(array('filter'=>array('TABLE_NAME'=>$NameTable)));
     if ( !($hldata = $rsData->fetch()) ){
         echo "Инфоблок не создан";
+        return true;
     }else {
         echo "Инфоблок создан";
+        return false;
     }
 
 }
@@ -156,9 +158,97 @@ function getItem(){
     
 }
 
-// $CreateTable = createTable();
-// print_r($CreateTable);
+/**
+ * getAllElements - получить все элементы
+ *
+ * @return void
+ */
+function getAllElements($NameTable){
+    $result = HL\HighloadBlockTable::add($NameTable);
+    $hlbl = $result->getId();
+    $hlblock = HL\HighloadBlockTable::getById($hlbl)->fetch(); 
 
-checkTable('Ratingsity');
+    $entity = HL\HighloadBlockTable::compileEntity($hlblock); 
+    $entity_data_class = $entity->getDataClass(); 
+
+    $rsData = $entity_data_class::getList(array(
+    "select" => array("*"),
+    "order" => array("UF_COUNTS_PEOPLE" => "ASC"),
+    "filter" => array()
+    ));
+
+    $arData = array();
+    while($arData = $rsData->Fetch()){
+        $arDataTable[] = $arData ;
+    }
+
+    return $arDataTable;
+}
+
+function sortArray( $array, $nameFild ){
+    foreach ($array as $key => $row)
+    {
+        $array_sort[$key] = $row[$nameFild];
+    }
+    array_multisort($array_sort, SORT_DESC, $array);
+    unset( $array_sort );
+    
+    return $array;
+}
+
+if($_GET["create_table"] == 'Y' && checkTable('Ratingsity')){
+    $CreateTable = createTable();
+    print_r($CreateTable);
+}
+
+if($_GET["view_table"] == 'Y'){
+    $arrItems = getAllElements('Ratingsity');
+
+    // сортировка по доходам и добавления рейтинга
+    $arrItems = sortArray( $array, 'UF_INCOME' );   
+    foreach($arrItems as $key => $value){
+        $arrItems[$key]['RATING_INCOME'] = $key;
+    }
+
+    // сортировка по расходам и добавления рейтинга
+    $arrItems = sortArray( $array, 'UF_COSTS' );   
+    foreach($arrItems as $key => $value){
+        $arrItems[$key]['RATING_COST'] = $key;
+    }
+
+    // сортировка по количеству жителей и добавления рейтинга
+    $arrItems = sortArray( $array, 'UF_COUNTS_PEOPLE' );   
+    foreach($arrItems as $key => $value){
+        $arrItems[$key]['RATING_PEOPLE'] = $key;
+    }
+
+    // выводим таблицу 
+    echo '<table><tr>
+    <th>Название</th>
+    <th>Доходы общие</th>
+    <th>Расходы общие</th>
+    <th>Количество жителей</th>
+    <th>Место в рейтинге по количеству жителей</th>
+    <th>Место в рейтинге по средним доходам населения</th>
+    <th>Место по средним расходам населения</th>
+    </tr>';
+
+    foreach($arrItems as $key => $value){
+        echo '<tr><td>'.$value['UF_NAME_SITY'].'</td>
+        <td>'.$value['UF_INCOME'].'</td>
+        <td>'.$value['UF_INCOME'].'</td>
+        <td>'.$value['UF_COSTS'].'</td>
+        <td>'.$value['UF_COUNTS_PEOPLE'].'</td>
+        <td>'.$value['RATING_INCOME'].'</td>
+        <td>'.$value['RATING_COST'].'</td>
+        <td>'.$value['RATING_PEOPLE'].'</td>
+        </tr>';
+    }
+
+    echo '</table>';
+
+
+}
+
 
 ?>
